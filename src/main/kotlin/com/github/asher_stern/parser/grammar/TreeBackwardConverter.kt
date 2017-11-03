@@ -5,8 +5,10 @@ import com.github.asher_stern.parser.tree.TreeNode
 /**
  * Created by Asher Stern on November-02 2017.
  */
-class TreeBackwardConverter<N, T>(originalGrammer: Grammar<N, T>, normalizedGrammar: Grammar<N, T>)
+class TreeBackwardConverter<N, T>(private val auxiliarySymbols: Set<N>)
 {
+    constructor(originalGrammer: Grammar<N, T>, normalizedGrammar: Grammar<N, T>) : this (normalizedGrammar.nonTerminals - originalGrammer.nonTerminals)
+
     fun convertTree(root: TreeNode<N, T>): TreeNode<N, T>
     {
         val convertedChildren = convertChildren(root.children)
@@ -35,7 +37,7 @@ class TreeBackwardConverter<N, T>(originalGrammer: Grammar<N, T>, normalizedGram
                 }
                 else
                 {
-                    if ((child.content.symbol != null) && (child.content.symbol in newSymbols))
+                    if ((child.content.symbol != null) && (child.content.symbol in auxiliarySymbols))
                     {
                         nextChildren.addAll(child.children)
                         converted = true
@@ -52,6 +54,4 @@ class TreeBackwardConverter<N, T>(originalGrammer: Grammar<N, T>, normalizedGram
 
         return _children
     }
-
-    private val newSymbols = normalizedGrammar.nonTerminals - originalGrammer.nonTerminals
 }
