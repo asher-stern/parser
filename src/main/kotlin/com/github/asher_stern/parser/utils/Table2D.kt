@@ -21,5 +21,8 @@ class Table2D<T1,T2,V>
         return map[firstIndex]
     }
 
+    val firstIndexes: Set<T1>
+        get() = map.keys
+
     private val map: MutableMap<T1, MutableMap<T2, V?>> = mutableMapOf()
 }

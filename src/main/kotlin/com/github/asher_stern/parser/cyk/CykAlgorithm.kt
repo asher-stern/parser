@@ -18,17 +18,22 @@ class CykAlgorithm<N, T>(
 {
     fun parse(): CykTreeDerivationNode<N, T>?
     {
+        println("1")
         if (!fillTerminalRules())
         {
             return null
         }
+        println("2")
         fillNonTerminalRules()
+        println("3")
         if (table[1, sentence.size, grammar.startSymbol] != null)
         {
+            println("4")
             return buildTree(1, sentence.size, grammar.startSymbol)
         }
         else
         {
+            println("5")
             return null
         }
     }
@@ -87,6 +92,7 @@ class CykAlgorithm<N, T>(
         val sentenceSize = sentence.size
         for (length_minus_1 in 1..(sentenceSize-1))
         {
+            println("length_minus_1 = $length_minus_1")
             for (start in 1..(sentenceSize-length_minus_1))
             {
                 val end = (start + length_minus_1)

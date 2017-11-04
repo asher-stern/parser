@@ -10,6 +10,7 @@
 
     <properties>
         <kotlin.version>1.1.51</kotlin.version>
+        <kotlin.compiler.jvmTarget>1.8</kotlin.compiler.jvmTarget>
     </properties>
 
 
@@ -35,7 +36,9 @@
                     </execution>
                 </executions>
             </plugin>
+
         </plugins>
+
 
     </build>
 

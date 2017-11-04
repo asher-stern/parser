@@ -38,6 +38,11 @@ abstract class ChomskyNormalFormConverter<N, T>(private val grammar: Grammar<N ,
                 )
     }
 
+    val newGrammar: Grammar<N, T>
+        get() = _newGrammar ?: throw RuntimeException("Not yet converted.")
+    val newSymbols: List<N>
+        get() = _newSymbols
+
 
     protected abstract fun createNewSymbol(index: Int): N
 
@@ -116,12 +121,13 @@ abstract class ChomskyNormalFormConverter<N, T>(private val grammar: Grammar<N ,
     }
 
 
-    val newGrammar: Grammar<N, T>
-        get() = _newGrammar ?: throw RuntimeException("Not yet converted.")
-    val newSymbols: List<N>
-        get() = _newSymbols
 
     private var _newGrammar: Grammar<N, T>? = null
     private val _newSymbols = mutableListOf<N>()
     private var newSymbolIndex = 1
+}
+
+class StringChomskyNormalFormConverter<T>(grammar: Grammar<String, T>) : ChomskyNormalFormConverter<String, T>(grammar)
+{
+    override fun createNewSymbol(index: Int): String = "AUX_$index"
 }
