@@ -41,16 +41,11 @@ fun <N> mergeWordsToTree(sentence: Array1<String>, tree: TreeNode<N, String>): T
     return WordsToTreeMerger(sentence, tree).merge()
 }
 
-fun <N> removeWordsFromTree(tree: TreeNode<N, PosAndWord>): TreeNode<N, String>
-{
-    val content: SyntacticItem<N, String> = when
-    {
-        tree.content.symbol != null -> SyntacticItem.createSymbol(tree.content.symbol)
-        else -> SyntacticItem.createTerminal(tree.content.terminal!!.pos)
-    }
+fun <N> removeWordsFromTree(tree: TreeNode<N, PosAndWord>): TreeNode<N, String> =
+        removeWordsOrPosFromTree(tree, true)
 
-    return TreeNode(content, tree.children.map { removeWordsFromTree(it) }.toMutableList())
-}
+fun <N> removePosFromTree(tree: TreeNode<N, PosAndWord>): TreeNode<N, String> =
+        removeWordsOrPosFromTree(tree, false)
 
 fun <T> treeYield(tree: TreeNode<*, T>): List<T>
 {
@@ -75,29 +70,17 @@ fun <T> treeYield(tree: TreeNode<*, T>): List<T>
     return ret
 }
 
-//fun <N, T> convertCykTreeToTree(tree: CykTreeDerivationNode<N, T>): TreeNode<N, T>
-//{
-//    val content = when
-//    {
-//        tree.terminal != null -> SyntacticItem.createTerminal<N, T>(tree.terminal)
-//        else -> SyntacticItem.createSymbol(tree.item!!.lhs)
-//    }
-//
-//    val ret = TreeNode(content)
-//
-//    if (tree.firstChild != null)
-//    {
-//        ret.addChild(convertCykTreeToTree(tree.firstChild!!))
-//    }
-//    if (tree.secondChild != null)
-//    {
-//        ret.addChild(convertCykTreeToTree(tree.secondChild!!))
-//    }
-//
-//    return ret
-//}
 
+private fun <N> removeWordsOrPosFromTree(tree: TreeNode<N, PosAndWord>, wordOrPos: Boolean): TreeNode<N, String>
+{
+    val content: SyntacticItem<N, String> = when
+    {
+        tree.content.symbol != null -> SyntacticItem.createSymbol(tree.content.symbol)
+        else -> SyntacticItem.createTerminal( if (wordOrPos) tree.content.terminal!!.pos else tree.content.terminal!!.word)
+    }
 
+    return TreeNode(content, tree.children.map { removeWordsOrPosFromTree(it, wordOrPos) }.toMutableList())
+}
 
 
 private class WordsToTreeMerger<N>(private val sentence: Array1<String>, private val tree: TreeNode<N, String>)

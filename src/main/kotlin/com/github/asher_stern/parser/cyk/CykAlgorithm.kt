@@ -18,22 +18,17 @@ class CykAlgorithm<N, T>(
 {
     fun parse(): CykTreeDerivationNode<N, T>?
     {
-        println("1")
         if (!fillTerminalRules())
         {
             return null
         }
-        println("2")
         fillNonTerminalRules()
-        println("3")
         if (table[1, sentence.size, grammar.startSymbol] != null)
         {
-            println("4")
             return buildTree(1, sentence.size, grammar.startSymbol)
         }
         else
         {
-            println("5")
             return null
         }
     }
@@ -60,32 +55,62 @@ class CykAlgorithm<N, T>(
 
     private fun find(firstStart: Int, firstEnd: Int, secondStart: Int, secondEnd: Int): Map<N, CykTableItem<N>>
     {
-        val firstCandidates = table[firstStart, firstEnd]
-        val secondCandidates = table[secondStart, secondEnd]
+        val ret = mutableMapOf<N, CykTableItem<N>>()
 
-        val lhsCandidates = mutableMapOf<N, CykTableItem<N>>()
-        for ( (rhsFirst, rhsFirstItem) in firstCandidates.orEmpty() )
+        val firstCandidates: Map<N, CykTableItem<N>?> = table[firstStart, firstEnd].orEmpty()
+        val firstCandidatesKeys = firstCandidates.keys
+        val secondCandidates: Map<N, CykTableItem<N>?> = table[secondStart, secondEnd].orEmpty()
+        val secondCandidatesKeys = secondCandidates.keys
+
+        for (rawRule in grammar.listNonTerminalRules)
         {
-            for ( (rhsSecond, rhsSecondItem) in secondCandidates.orEmpty() )
+            if ( (rawRule.rhsFirst in firstCandidatesKeys) && (rawRule.rhsSecond in secondCandidatesKeys) )
             {
-                val lhss = grammar.nonTerminalRules[rhsFirst, rhsSecond]
-                for ( (lhs, lhsLogProbability) in lhss.orEmpty())
+                val logProbability = firstCandidates.getValue(rawRule.rhsFirst)!!.logProbability + secondCandidates.getValue(rawRule.rhsSecond)!!.logProbability + rawRule.logProbability
+                val add = when
                 {
-                    if ( (lhsLogProbability != null) && (rhsFirstItem != null) && (rhsSecondItem != null) )
-                    {
-                        val candidateLogProbability = rhsFirstItem.logProbability + rhsSecondItem.logProbability + lhsLogProbability
-                        val soFarItem = lhsCandidates[lhs]
-                        if ( (soFarItem == null) || (soFarItem.logProbability < candidateLogProbability) )
-                        {
-                            lhsCandidates[lhs] = CykTableItem<N>(lhs, rhsFirst, rhsSecond, secondStart, candidateLogProbability)
-                        }
-                    }
+                    rawRule.lhs in ret.keys -> logProbability > ret.getValue(rawRule.lhs).logProbability
+                    else -> true
+                }
+
+                if (add)
+                {
+                    ret[rawRule.lhs] = CykTableItem<N>(rawRule.lhs, rawRule.rhsFirst, rawRule.rhsSecond, secondStart, logProbability)
                 }
             }
         }
 
-        return lhsCandidates
+        return ret
     }
+
+//    private fun find(firstStart: Int, firstEnd: Int, secondStart: Int, secondEnd: Int): Map<N, CykTableItem<N>>
+//    {
+//        val firstCandidates = table[firstStart, firstEnd]
+//        val secondCandidates = table[secondStart, secondEnd]
+//
+//        val lhsCandidates = mutableMapOf<N, CykTableItem<N>>()
+//        for ( (rhsFirst, rhsFirstItem) in firstCandidates.orEmpty() )
+//        {
+//            for ( (rhsSecond, rhsSecondItem) in secondCandidates.orEmpty() )
+//            {
+//                val lhss = grammar.nonTerminalRules[rhsFirst, rhsSecond]
+//                for ( (lhs, lhsLogProbability) in lhss.orEmpty())
+//                {
+//                    if ( (lhsLogProbability != null) && (rhsFirstItem != null) && (rhsSecondItem != null) )
+//                    {
+//                        val candidateLogProbability = rhsFirstItem.logProbability + rhsSecondItem.logProbability + lhsLogProbability
+//                        val soFarItem = lhsCandidates[lhs]
+//                        if ( (soFarItem == null) || (soFarItem.logProbability < candidateLogProbability) )
+//                        {
+//                            lhsCandidates[lhs] = CykTableItem<N>(lhs, rhsFirst, rhsSecond, secondStart, candidateLogProbability)
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//
+//        return lhsCandidates
+//    }
 
     private fun fillNonTerminalRules()
     {
