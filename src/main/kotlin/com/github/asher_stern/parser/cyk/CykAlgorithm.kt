@@ -85,41 +85,11 @@ class CykAlgorithm<N, T>(
         return ret
     }
 
-//    private fun find(firstStart: Int, firstEnd: Int, secondStart: Int, secondEnd: Int): Map<N, CykTableItem<N>>
-//    {
-//        val firstCandidates = table[firstStart, firstEnd]
-//        val secondCandidates = table[secondStart, secondEnd]
-//
-//        val lhsCandidates = mutableMapOf<N, CykTableItem<N>>()
-//        for ( (rhsFirst, rhsFirstItem) in firstCandidates.orEmpty() )
-//        {
-//            for ( (rhsSecond, rhsSecondItem) in secondCandidates.orEmpty() )
-//            {
-//                val lhss = grammar.nonTerminalRules[rhsFirst, rhsSecond]
-//                for ( (lhs, lhsLogProbability) in lhss.orEmpty())
-//                {
-//                    if ( (lhsLogProbability != null) && (rhsFirstItem != null) && (rhsSecondItem != null) )
-//                    {
-//                        val candidateLogProbability = rhsFirstItem.logProbability + rhsSecondItem.logProbability + lhsLogProbability
-//                        val soFarItem = lhsCandidates[lhs]
-//                        if ( (soFarItem == null) || (soFarItem.logProbability < candidateLogProbability) )
-//                        {
-//                            lhsCandidates[lhs] = CykTableItem<N>(lhs, rhsFirst, rhsSecond, secondStart, candidateLogProbability)
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//
-//        return lhsCandidates
-//    }
-
     private fun fillNonTerminalRules()
     {
         val sentenceSize = sentence.size
         for (length_minus_1 in 1..(sentenceSize-1))
         {
-            println("length_minus_1 = $length_minus_1")
             for (start in 1..(sentenceSize-length_minus_1))
             {
                 val end = (start + length_minus_1)
@@ -206,7 +176,7 @@ class CykAlgorithm<N, T>(
         else
         {
             val rhsFirstChild = buildTree(start, item.secondBeginIndex!!-1, item.rhsFirst)
-            val rhsSecondChild = buildTree(item.secondBeginIndex!!, end, item.rhsSecond!!)
+            val rhsSecondChild = buildTree(item.secondBeginIndex, end, item.rhsSecond!!)
 
             val node = CykTreeDerivationNode<N, T>(item)
             node.firstChild = rhsFirstChild

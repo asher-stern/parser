@@ -119,10 +119,10 @@ fun main(args: Array<String>)
         {
             println("Parsed")
             val resultTreeSimple = convertCykToSimpleTree(resultTree)
-            println("Result tree as is:")
-            println(TreePresent(mergeWordsToTree(sentenceWords, resultTreeSimple)).present())
+//            println("Result tree as is:")
+//            println(TreePresent(mergeWordsToTree(sentenceWords, resultTreeSimple)).present())
             val resultTreeSimpleConverted = TreeBackwardConverter(originalGrammar, newGrammar).convertTree(resultTreeSimple)
-            println("Result tree backward converted:")
+            println("Result tree:")
             println(TreePresent(mergeWordsToTree(sentenceWords, resultTreeSimpleConverted)).present())
         }
     }
