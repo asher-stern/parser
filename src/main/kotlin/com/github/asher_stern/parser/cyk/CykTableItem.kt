@@ -5,6 +5,7 @@ package com.github.asher_stern.parser.cyk
  */
 data class CykTableItem<N>(
         val lhs: N,
+        val rhsSingleSymbol: List<N>?,
         val rhsFirst: N?,
         val rhsSecond: N?,
         val secondBeginIndex: Int?,

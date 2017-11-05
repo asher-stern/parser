@@ -47,8 +47,10 @@ class CykAlgorithm<N, T>(
             }
             for ( (nonTerminal, logProbability) in rules.orEmpty() )
             {
-                table[index, index, nonTerminal] = CykTableItem<N>(nonTerminal, null, null, null, logProbability!!)
+                table[index, index, nonTerminal] = CykTableItem<N>(nonTerminal, null, null, null, null, logProbability!!)
             }
+
+            addSingleToSingleRulesToTable(index, index)
         }
         return true
     }
@@ -75,7 +77,7 @@ class CykAlgorithm<N, T>(
 
                 if (add)
                 {
-                    ret[rawRule.lhs] = CykTableItem<N>(rawRule.lhs, rawRule.rhsFirst, rawRule.rhsSecond, secondStart, logProbability)
+                    ret[rawRule.lhs] = CykTableItem<N>(rawRule.lhs, null, rawRule.rhsFirst, rawRule.rhsSecond, secondStart, logProbability)
                 }
             }
         }
@@ -121,6 +123,7 @@ class CykAlgorithm<N, T>(
             for (start in 1..(sentenceSize-length_minus_1))
             {
                 val end = (start + length_minus_1)
+
                 val candidates = mutableMapOf<N, CykTableItem<N>>()
                 for (rhsFirstEnds in start..(end-1))
                 {
@@ -145,7 +148,39 @@ class CykAlgorithm<N, T>(
                 {
                     table[start, end, lhs] = item
                 }
+
+                addSingleToSingleRulesToTable(start, end)
             }
+        }
+    }
+
+    private fun addSingleToSingleRulesToTable(start: Int, end: Int)
+    {
+        val candidatesRhs1 = mutableMapOf<N, CykTableItem<N>>()
+        for (s2sRule in grammar.listSingleToSingleRules)
+        {
+            val correspondingRhsInTable = table[start, end, s2sRule.rhs]
+            if (correspondingRhsInTable != null)
+            {
+                val newItemLogProbability = s2sRule.logProbability + correspondingRhsInTable.logProbability
+                val existingItem = table[start, end, s2sRule.lhs]
+                val betterThanTable = (existingItem == null) || (newItemLogProbability > existingItem.logProbability)
+                if (betterThanTable)
+                {
+                    val existingCandidate = candidatesRhs1[s2sRule.lhs]
+                    val bestSoFar = (existingCandidate == null) || (newItemLogProbability > existingCandidate.logProbability)
+                    if (bestSoFar)
+                    {
+                        val rhsList = correspondingRhsInTable.rhsSingleSymbol.orEmpty() + s2sRule.rhs
+                        candidatesRhs1[s2sRule.lhs] = CykTableItem(s2sRule.lhs, rhsList, correspondingRhsInTable.rhsFirst, correspondingRhsInTable.rhsSecond, correspondingRhsInTable.secondBeginIndex, newItemLogProbability)
+                    }
+                }
+            }
+        }
+
+        for ( (symbol, item) in candidatesRhs1)
+        {
+            table[start, end, symbol] = item
         }
     }
 
@@ -157,7 +192,11 @@ class CykAlgorithm<N, T>(
             if (start == end)
             {
                 val terminal = sentence[start]
-                return CykTreeDerivationNode<N, T>(terminal)
+                val terminalNode = CykTreeDerivationNode<N, T>(terminal)
+
+                val node = CykTreeDerivationNode<N, T>(item)
+                node.singleChild = terminalNode
+                return node
             }
             else
             {

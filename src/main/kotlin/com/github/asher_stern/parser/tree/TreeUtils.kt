@@ -16,25 +16,63 @@ fun <N, T> extractNakedRuleFromNode(content: N, children: List<TreeNode<N, T>>):
 fun <N, T> extractNakedRuleFromNode(node: TreeNode<N, T>): NakedRule<N, T> =
         extractNakedRuleFromNode(node.content.symbol!!, node.children)
 
-fun <N,T> convertCykToSimpleTree(node: CykTreeDerivationNode<N, T>): TreeNode<N, T>
+
+fun <N, T> convertCykToSimpleTree(cykTree: CykTreeDerivationNode<N, T>): TreeNode<N, T>
 {
-    val children = mutableListOf<TreeNode<N, T>>()
-
-    node.firstChild ?.let {
-        children.add(convertCykToSimpleTree(it))
-    }
-    node.secondChild ?.let {
-        children.add(convertCykToSimpleTree(it))
-    }
-
-    val item: SyntacticItem<N, T> = when
+    if (cykTree.terminal != null)
     {
-        node.terminal != null -> SyntacticItem.createTerminal<N,T>(node.terminal)
-        else -> SyntacticItem.createSymbol<N, T>(node.item!!.lhs)
+        return TreeNode(SyntacticItem.createTerminal(cykTree.terminal))
     }
+    else
+    {
+        cykTree.item!! // Merely check not null
 
-    return TreeNode(item, children)
+        val rootNode = TreeNode<N, T>(SyntacticItem.createSymbol(cykTree.item.lhs))
+        var node: TreeNode<N, T> = rootNode
+        for (singleSymbol in cykTree.item.rhsSingleSymbol.orEmpty())
+        {
+            val child = TreeNode(SyntacticItem.createSymbol<N,T>(singleSymbol))
+            node.addChild(child)
+            node = child
+        }
+
+        if (cykTree.singleChild != null)
+        {
+            node.addChild(convertCykToSimpleTree(cykTree.singleChild!!))
+            return rootNode
+        }
+        else if ( (cykTree.firstChild != null) && (cykTree.secondChild != null) )
+        {
+            node.addChild(convertCykToSimpleTree(cykTree.firstChild!!))
+            node.addChild(convertCykToSimpleTree(cykTree.secondChild!!))
+            return rootNode
+        }
+        else
+        {
+            throw RuntimeException("Non terminal node has no children.")
+        }
+    }
 }
+
+//fun <N,T> convertCykToSimpleTree(node: CykTreeDerivationNode<N, T>): TreeNode<N, T>
+//{
+//    val children = mutableListOf<TreeNode<N, T>>()
+//
+//    node.firstChild ?.let {
+//        children.add(convertCykToSimpleTree(it))
+//    }
+//    node.secondChild ?.let {
+//        children.add(convertCykToSimpleTree(it))
+//    }
+//
+//    val item: SyntacticItem<N, T> = when
+//    {
+//        node.terminal != null -> SyntacticItem.createTerminal<N,T>(node.terminal)
+//        else -> SyntacticItem.createSymbol<N, T>(node.item!!.lhs)
+//    }
+//
+//    return TreeNode(item, children)
+//}
 
 fun <N> mergeWordsToTree(sentence: Array1<String>, tree: TreeNode<N, String>): TreeNode<N, PosAndWord>
 {

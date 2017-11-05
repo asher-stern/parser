@@ -11,6 +11,7 @@ data class ChomskyNormalFormGrammar<N, T>(
         val terminals: Set<T>,
         val nonTerminals: Set<N>,
         val terminalRules: Table2D<T, N, Double>, // from terminal to non-terminals (to log probability)
+        val singleToSingleRules: Table2D<N, N, Double>, // from rhs to lhs (to log probability)
         val nonTerminalRules: Table3D<N, N, N, Double> // from first & second in the RHS to the LHS (to log probability)
 )
 {
@@ -30,6 +31,22 @@ data class ChomskyNormalFormGrammar<N, T>(
         }
         listNonTerminalRules = _list
     }
+
+    val listSingleToSingleRules: List<RawSingleToSingleRule<N>>
+    init
+    {
+        val _list = mutableListOf<RawSingleToSingleRule<N>>()
+        for (rhs in singleToSingleRules.firstIndexes)
+        {
+            for ((lhs, logProbability) in singleToSingleRules[rhs]!!)
+            {
+                _list.add(RawSingleToSingleRule(lhs, rhs, logProbability!!))
+            }
+        }
+        listSingleToSingleRules = _list
+    }
 }
 
 data class RawChomskyNormalFormRule<N>(val lhs: N, val rhsFirst: N, val rhsSecond: N, val logProbability: Double)
+
+data class RawSingleToSingleRule<N>(val lhs: N, val rhs: N, val logProbability: Double)

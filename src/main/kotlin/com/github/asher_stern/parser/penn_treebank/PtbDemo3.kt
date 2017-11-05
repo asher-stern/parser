@@ -45,12 +45,12 @@ fun main(args: Array<String>)
     val originalGrammar = Grammar("S", nonTerminals, PtbPosTags.tags, rules.toSet())
 
     println()
-    println("Remove single-to-single")
-    val s2sConverter = ChomskySingleToSingleConverter(originalGrammar)
-    s2sConverter.convert()
-    val noS2sGrammar = s2sConverter.newGrammar
-
-    println(noS2sGrammar.rules.size)
+//    println("Remove single-to-single")
+//    val s2sConverter = ChomskySingleToSingleConverter(originalGrammar)
+//    s2sConverter.convert()
+//    val noS2sGrammar = s2sConverter.newGrammar
+//
+//    println(noS2sGrammar.rules.size)
 //    for (rule in noS2sGrammar.rules)
 //    {
 //        println(rule.friendlyString)
@@ -63,7 +63,7 @@ fun main(args: Array<String>)
 
 
     println("Convert to Chomsky normal form")
-    val converter = StringChomskyNormalFormConverter(noS2sGrammar)
+    val converter = StringChomskyNormalFormConverter(originalGrammar)
     converter.convert()
     val newGrammar = converter.newGrammar
 
@@ -98,31 +98,33 @@ fun main(args: Array<String>)
 //    }
 
 
-    val treeToTest = trees.first()
-    println ("About to test the following tree:")
-    println (TreePresent(treeToTest).present())
-
-    val sentenceToParse = Array1(treeYield(removeWordsFromTree(treeToTest)).toTypedArray())
-    val sentenceWords = Array1(treeYield(removePosFromTree(treeToTest)).toTypedArray())
-
-    println ("About to parse the following sentence")
-    println(sentenceToParse)
-
-    val cykAlgorithm = CykAlgorithm<String, String>(chomskyNormalFormGrammar, sentenceToParse)
-    val resultTree = cykAlgorithm.parse()
-    if (resultTree == null)
+    for (treeToTest in trees.take(10))
     {
-        println("No result")
-    }
-    else
-    {
-        println("Parsed")
-        val resultTreeSimple = convertCykToSimpleTree(resultTree)
-        println("Result tree as is:")
-        println (TreePresent(mergeWordsToTree(sentenceWords, resultTreeSimple)).present())
-        val resultTreeSimpleConverted = TreeBackwardConverter(originalGrammar, newGrammar, s2sConverter.collapsedMap).convertTree(resultTreeSimple)
-        println("Result tree backward converted:")
-        println (TreePresent(mergeWordsToTree(sentenceWords, resultTreeSimpleConverted)).present())
+        println("About to test the following tree:")
+        println(TreePresent(treeToTest).present())
+
+        val sentenceToParse = Array1(treeYield(removeWordsFromTree(treeToTest)).toTypedArray())
+        val sentenceWords = Array1(treeYield(removePosFromTree(treeToTest)).toTypedArray())
+
+        println("About to parse the following sentence")
+        println(sentenceToParse)
+
+        val cykAlgorithm = CykAlgorithm<String, String>(chomskyNormalFormGrammar, sentenceToParse)
+        val resultTree = cykAlgorithm.parse()
+        if (resultTree == null)
+        {
+            println("No result")
+        }
+        else
+        {
+            println("Parsed")
+            val resultTreeSimple = convertCykToSimpleTree(resultTree)
+            println("Result tree as is:")
+            println(TreePresent(mergeWordsToTree(sentenceWords, resultTreeSimple)).present())
+            val resultTreeSimpleConverted = TreeBackwardConverter(originalGrammar, newGrammar).convertTree(resultTreeSimple)
+            println("Result tree backward converted:")
+            println(TreePresent(mergeWordsToTree(sentenceWords, resultTreeSimpleConverted)).present())
+        }
     }
 
 }

@@ -10,6 +10,7 @@ abstract class ChomskyNormalFormConverter<N, T>(private val grammar: Grammar<N ,
         var rules = mutableListOf<Rule<N, T>>()
         rules.addAll(grammar.rules)
         val wellFormedRules = mutableSetOf<Rule<N, T>>()
+        val singleToSingleRules = mutableSetOf<Rule<N, T>>()
 
         while (!rules.isEmpty())
         {
@@ -19,6 +20,10 @@ abstract class ChomskyNormalFormConverter<N, T>(private val grammar: Grammar<N ,
                 if (isWellFormed(rule))
                 {
                     wellFormedRules.add(rule)
+                }
+                else if (isSingleToSingle(rule))
+                {
+                    singleToSingleRules.add(rule)
                 }
                 else
                 {
@@ -34,7 +39,7 @@ abstract class ChomskyNormalFormConverter<N, T>(private val grammar: Grammar<N ,
                 grammar.startSymbol,
                 grammar.nonTerminals + _newSymbols,
                 grammar.terminals,
-                wellFormedRules
+                wellFormedRules + singleToSingleRules
                 )
     }
 
@@ -59,9 +64,14 @@ abstract class ChomskyNormalFormConverter<N, T>(private val grammar: Grammar<N ,
         return false
     }
 
+    private fun isSingleToSingle(rule: Rule<N, T>): Boolean
+    {
+        return (rule.rhs.size == 1) && (rule.rhs.first().symbol != null)
+    }
+
     private fun convertRule(rule: Rule<N, T>): Pair<Rule<N, T>, Rule<N, T>>
     {
-        if (rule.rhs.size == 1) { throw RuntimeException("Single-symbol to single-symbol rules are not handled by this converter.") }
+        if (rule.rhs.size == 1) { throw RuntimeException("Bug: unexpected single-symbol to single-symbol rule.") }
         val lastTerminal = rule.rhs.withIndex().lastOrNull { it.value.terminal!=null }
         if (lastTerminal != null)
         {

@@ -11,6 +11,25 @@ class CykTreeDerivationNode<N, T> private constructor(
     constructor(terminal: T) : this(terminal, null)
     constructor(item: CykTableItem<N>) : this(null, item)
 
+    var singleChild: CykTreeDerivationNode<N, T>? = null
+        set(value)
+        {
+            if ( (firstChild != null) || (secondChild != null) ) throw RuntimeException("Inconsistency")
+            field = value
+        }
+
     var firstChild: CykTreeDerivationNode<N, T>? = null
+        set(value)
+        {
+            if (singleChild != null) throw RuntimeException("Inconsistency")
+            field = value
+        }
+
     var secondChild: CykTreeDerivationNode<N, T>? = null
+        set(value)
+        {
+            if (singleChild != null) throw RuntimeException("Inconsistency")
+            field = value
+        }
+
 }
