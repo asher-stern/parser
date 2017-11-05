@@ -1,5 +1,7 @@
 package com.github.asher_stern.parser.utils
 
+import java.util.*
+
 /**
  * Created by Asher Stern on November-02 2017.
  */
@@ -51,7 +53,7 @@ class Array1<T>(private val underlying: Array<T>)
     {
         if (other is Array1<*>)
         {
-            return (underlying == other.underlying)
+            return Arrays.equals(underlying, other.underlying)
         }
         else
         {
@@ -59,7 +61,7 @@ class Array1<T>(private val underlying: Array<T>)
         }
     }
 
-    override fun hashCode(): Int = underlying.hashCode()
+    override fun hashCode(): Int = Arrays.hashCode(underlying)
 
     val size: Int
         get() = underlying.size

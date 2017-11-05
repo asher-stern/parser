@@ -1,8 +1,10 @@
-package com.github.asher_stern.parser.penn_treebank
+package com.github.asher_stern.parser.demo
 
 import com.github.asher_stern.parser.cyk.CykAlgorithm
 import com.github.asher_stern.parser.grammar.*
 import com.github.asher_stern.parser.grammar.acquisition.GrammarAcquisitionFromTrees
+import com.github.asher_stern.parser.penn_treebank.PtbPosTags
+import com.github.asher_stern.parser.penn_treebank.extractTrees
 import com.github.asher_stern.parser.tree.*
 import com.github.asher_stern.parser.utils.Array1
 import java.io.File
