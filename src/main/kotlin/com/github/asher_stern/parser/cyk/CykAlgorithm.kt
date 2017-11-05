@@ -11,9 +11,9 @@ import com.github.asher_stern.parser.utils.Table3D
 /**
  * See http://www.cs.columbia.edu/~mcollins/courses/nlp2011/notes/pcfgs.pdf
  */
-class CykAlgorithm<N, T>(
-        private val grammar: ChomskyNormalFormGrammar<N, T>,
-        private val sentence: Array1<T>
+open class CykAlgorithm<N, T>(
+        protected val grammar: ChomskyNormalFormGrammar<N, T>,
+        protected val sentence: Array1<T>
 )
 {
     fun parse(): CykTreeDerivationNode<N, T>?
@@ -25,12 +25,22 @@ class CykAlgorithm<N, T>(
         fillNonTerminalRules()
         if (table[1, sentence.size, grammar.startSymbol] != null)
         {
+            _wellParsed = true
             return buildTree(1, sentence.size, grammar.startSymbol)
         }
         else
         {
-            return null
+            return hackTree()
         }
+    }
+
+    val wellParsed: Boolean get() = _wellParsed
+
+
+    open protected fun hackTree(): CykTreeDerivationNode<N, T>?
+    {
+        // Can be implemented by sub-class
+        return null
     }
 
 
@@ -154,7 +164,7 @@ class CykAlgorithm<N, T>(
         }
     }
 
-    private fun buildTree(start: Int, end: Int, symbol: N): CykTreeDerivationNode<N, T>
+    protected fun buildTree(start: Int, end: Int, symbol: N): CykTreeDerivationNode<N, T>
     {
         val item = table[start, end, symbol] ?: throw RuntimeException("Tree cannot be built. Null for $start, $end, $symbol.")
         if (item.rhsFirst == null)
@@ -185,5 +195,9 @@ class CykAlgorithm<N, T>(
         }
     }
 
-    private val table = Table3D<Int, Int, N, CykTableItem<N>>()
+
+
+    protected val table = Table3D<Int, Int, N, CykTableItem<N>>()
+
+    private var _wellParsed: Boolean = false
 }
