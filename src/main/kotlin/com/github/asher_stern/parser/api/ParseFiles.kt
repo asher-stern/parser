@@ -1,6 +1,7 @@
 package com.github.asher_stern.parser.api
 
 import com.github.asher_stern.parser.grammar.ChomskyNormalFormGrammar
+import com.github.asher_stern.parser.penn_treebank.normalizePtbPosTag
 import com.github.asher_stern.parser.tree.PosAndWord
 import com.github.asher_stern.parser.tree.TreePresent
 import com.google.gson.Gson
@@ -19,10 +20,12 @@ fun main(args: Array<String>)
 
     val gson = Gson()
 
+    val setStringType = object : TypeToken<Set<String>>(){}.type
+    val auxiliarySymbols = gson.fromJson<Set<String>>(File(modelDirectory, "auxiliary.json").readText(), setStringType)
     val grammarType = object : TypeToken<ChomskyNormalFormGrammar<String, String>>(){}.type
     val chomskyNormalFormGrammar = gson.fromJson<ChomskyNormalFormGrammar<String, String>>(File(modelDirectory, "grammar.json").readText(), grammarType)
 
-    val parser = Parser(chomskyNormalFormGrammar)
+    val parser = Parser(chomskyNormalFormGrammar, auxiliarySymbols)
 
     resultFile.printWriter().use { writer ->
         SentenceLoader(sentenceFile).use { loader ->
@@ -31,7 +34,7 @@ fun main(args: Array<String>)
                 val (tree, grammatical, probability) = parser.parse(sentence)
                 writer.println(grammatical)
                 writer.println(probability)
-                writer.println(TreePresent(tree))
+                writer.println(TreePresent(tree).present())
             }
         }
     }
@@ -71,11 +74,7 @@ private class SentenceLoader(private val sentenceFile: File) : Sequence<Array<Po
 
         while (line != null)
         {
-            if (line.trim().isEmpty()) {}
-            else
-            {
-                lines.add(line)
-            }
+            if (line.trim().isNotEmpty()) { break }
             line = reader.readLine()
         }
 
@@ -86,13 +85,14 @@ private class SentenceLoader(private val sentenceFile: File) : Sequence<Array<Po
             line = reader.readLine()
         }
 
+        if (lines.isEmpty()) return null
         return lines.map { lineToPosAndWord(it) }.toTypedArray()
     }
 
     private fun lineToPosAndWord(line: String): PosAndWord
     {
         val (word, pos) = line.split("\t")
-        return PosAndWord(pos, word)
+        return PosAndWord(normalizePtbPosTag(pos), word)
     }
 
     private val reader = sentenceFile.bufferedReader()

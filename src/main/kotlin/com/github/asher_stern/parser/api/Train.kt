@@ -43,10 +43,13 @@ fun main(args: Array<String>)
     converter.convert()
     val newGrammar = converter.newGrammar
 
+    val auxiliarySymbols = newGrammar.nonTerminals - originalGrammar.nonTerminals
 
     val chomskyNormalFormGrammar: ChomskyNormalFormGrammar<String, String> = ChomskyNormalFormGrammarConstructor(newGrammar).construct()
 
     val gson = GsonBuilder().setPrettyPrinting().create()
+    val setStringType = object : TypeToken<Set<String>>(){}.type
+    File(destinationDirectory, "auxiliary.json").printWriter().use { it.println(gson.toJson(auxiliarySymbols, setStringType)) }
     val grammarType = object : TypeToken<ChomskyNormalFormGrammar<String, String>>(){}.type
     File(destinationDirectory, "grammar.json").printWriter().use { it.println(gson.toJson(chomskyNormalFormGrammar, grammarType)) }
 }
