@@ -11,6 +11,8 @@ import com.github.asher_stern.parser.tree.TreeNode
  */
 class GrammarAcquisitionFromTrees<N, T>(private val trees: List<TreeNode<N, T>>)
 {
+    var absoluteEncounteredLimitation: Int = 0
+
     fun acquire(): Set<Rule<N, T>>
     {
         extractNakedRules()
@@ -45,10 +47,14 @@ class GrammarAcquisitionFromTrees<N, T>(private val trees: List<TreeNode<N, T>>)
         val nameCounter = mutableMapOf<N, Long>()
         for (nakedRule in nakedRules.keys.sortedByDescending { nakedRules.getValue(it) })
         {
-            nameCounter._inc(nakedRule.lhs)
-            val name = "${nakedRule.lhs}_${nameCounter.getValue(nakedRule.lhs)}"
-            val probability = nakedRules.getValue(nakedRule).toDouble() / lhsCount.getValue(nakedRule.lhs).toDouble()
-            ret.add(Rule<N, T>(name, nakedRule.lhs, nakedRule.rhs, false, Math.log(probability)))
+            val encountered = nakedRules.getValue(nakedRule)
+            if (encountered >= absoluteEncounteredLimitation)
+            {
+                nameCounter._inc(nakedRule.lhs)
+                val name = "${nakedRule.lhs}_${nameCounter.getValue(nakedRule.lhs)}"
+                val probability = nakedRules.getValue(nakedRule).toDouble() / lhsCount.getValue(nakedRule.lhs).toDouble()
+                ret.add(Rule<N, T>(name, nakedRule.lhs, nakedRule.rhs, false, Math.log(probability)))
+            }
         }
 
         return ret
@@ -76,6 +82,25 @@ class GrammarAcquisitionFromTrees<N, T>(private val trees: List<TreeNode<N, T>>)
             return NakedRule(lhs, rhs)
         }
     }
+
+
+//    private fun debug_printNakedRules()
+//    {
+//        for (rule in nakedRules.entries.sortedBy { it.value })
+//        {
+//            println(rule.key.friendlyString + ": " + rule.value)
+//        }
+//
+//        val mapCountToHowMany = mutableMapOf<Long, Long>()
+//        for ( (_, count) in nakedRules )
+//        {
+//            mapCountToHowMany._inc(count)
+//        }
+//        for ( (count, howMany) in mapCountToHowMany.entries.sortedBy { it.key })
+//        {
+//            println("$count: $howMany")
+//        }
+//    }
 
     private val nakedRules = mutableMapOf<NakedRule<N, T>, Long>()
 }

@@ -1,6 +1,7 @@
 package com.github.asher_stern.parser.demo
 
 import com.github.asher_stern.parser.cyk.CykAlgorithm
+import com.github.asher_stern.parser.cyk.CykAlgorithmWithHack
 import com.github.asher_stern.parser.grammar.*
 import com.github.asher_stern.parser.grammar.acquisition.GrammarAcquisitionFromTrees
 import com.github.asher_stern.parser.penn_treebank.PtbPosTags
@@ -9,6 +10,7 @@ import com.github.asher_stern.parser.tree.*
 import com.github.asher_stern.parser.utils.Array1
 import java.io.File
 import java.io.FileFilter
+import kotlin.system.exitProcess
 
 /**
  * Created by Asher Stern on November-03 2017.
@@ -34,16 +36,22 @@ fun main(args: Array<String>)
     println(trees.size)
     println (treeYield(trees.first()).joinToString(" ") { it.word+"/"+it.pos })
 
-    val rules = GrammarAcquisitionFromTrees(trees.map { removeWordsFromTree(it) }).acquire()
+    val acquisition = GrammarAcquisitionFromTrees(trees.map { removeWordsFromTree(it) })
+    acquisition.absoluteEncounteredLimitation = 3
+    val rules = acquisition.acquire()
     println(rules.size)
 
-//    for (rule in rules)
-//    {
-//        println(rule.friendlyString)
-//    }
 
-    println(extractAllNonTerminals(rules))
+    for (rule in rules)
+    {
+        println(rule.friendlyString)
+    }
+
+
+
+
     val nonTerminals = extractAllNonTerminals(rules)
+    println(nonTerminals)
     val originalGrammar = Grammar("S", nonTerminals, PtbPosTags.tags, rules.toSet())
 
     println()
@@ -111,7 +119,7 @@ fun main(args: Array<String>)
         println("About to parse the following sentence")
         println(sentenceToParse)
 
-        val cykAlgorithm = CykAlgorithm<String, String>(chomskyNormalFormGrammar, sentenceToParse)
+        val cykAlgorithm = CykAlgorithmWithHack<String, String>(chomskyNormalFormGrammar, sentenceToParse)
         val resultTree = cykAlgorithm.parse()
         if (resultTree == null)
         {
@@ -119,7 +127,7 @@ fun main(args: Array<String>)
         }
         else
         {
-            println("Parsed")
+            println("Parsed. Grammatical = ${cykAlgorithm.wellParsed}. Probability = ${cykAlgorithm.parseProbability}")
             val resultTreeSimple = convertCykToSimpleTree(resultTree)
 //            println("Result tree as is:")
 //            println(TreePresent(mergeWordsToTree(sentenceWords, resultTreeSimple)).present())
