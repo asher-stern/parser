@@ -80,7 +80,7 @@ private fun loadAuxiliarySymbols(modelDirectory: File?): Set<String>
 
 private object ObjectForClassLoader
 
-private class SentenceLoader(private val sentenceFile: File) : Sequence<Array<PosAndWord>>, AutoCloseable
+private class SentenceLoader(sentenceFile: File) : Sequence<Array<PosAndWord>>, AutoCloseable
 {
     override fun close()
     {
