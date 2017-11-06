@@ -37,48 +37,36 @@ fun main(args: Array<String>)
 }
 
 
+private fun loadModelFile(modelDirectory: File?, fileName: String): String
+{
+    return when
+    {
+        modelDirectory != null -> File(modelDirectory, fileName).readText()
+        else -> ObjectForClassLoader::class.java.getResourceAsStream("/com/github/asher_stern/parser/model/$fileName").use { it.reader().use { it.readText() } }
+    }
+}
+
 private fun loadGrammar(modelDirectory: File?): ChomskyNormalFormGrammar<String, String>
 {
-    val json: String = when
-    {
-        modelDirectory != null ->
-        {
-            File(modelDirectory, "grammar.json").readText()
-        }
-        else ->
-        {
-            ObjectForClassLoader::class.java.getResourceAsStream("/com/github/asher_stern/parser/model/grammar.json").use { it.reader().use { it.readText() } }
-        }
-    }
+    val json = loadModelFile(modelDirectory, "grammar.json")
 
     val gson = Gson()
     val grammarType = object : TypeToken<ChomskyNormalFormGrammar<String, String>>() {}.type
-    val chomskyNormalFormGrammar = gson.fromJson<ChomskyNormalFormGrammar<String, String>>(json, grammarType)
-    return chomskyNormalFormGrammar
+    return gson.fromJson<ChomskyNormalFormGrammar<String, String>>(json, grammarType)
 }
 
 private fun loadAuxiliarySymbols(modelDirectory: File?): Set<String>
 {
-    val json: String = when
-    {
-        modelDirectory != null ->
-        {
-            File(modelDirectory, "auxiliary.json").readText()
-        }
-        else ->
-        {
-            ObjectForClassLoader::class.java.getResourceAsStream("/com/github/asher_stern/parser/model/auxiliary.json").use { it.reader().use { it.readText() } }
-        }
-    }
+    val json = loadModelFile(modelDirectory, "auxiliary.json")
 
     val gson = Gson()
     val setStringType = object : TypeToken<Set<String>>(){}.type
-    val auxiliarySymbols = gson.fromJson<Set<String>>(json, setStringType)
-    return auxiliarySymbols
+    return gson.fromJson<Set<String>>(json, setStringType)
 }
 
 
 private object ObjectForClassLoader
+
 
 private class SentenceLoader(sentenceFile: File) : Sequence<Array<PosAndWord>>, AutoCloseable
 {
@@ -131,7 +119,7 @@ private class SentenceLoader(sentenceFile: File) : Sequence<Array<PosAndWord>>, 
     private fun lineToPosAndWord(line: String): PosAndWord
     {
         val (word, pos) = line.split("\t")
-        return PosAndWord(normalizePtbPosTag(pos), word)
+        return PosAndWord(normalizePtbPosTag(pos.trim()), word.trim())
     }
 
     private val reader = sentenceFile.bufferedReader()
