@@ -54,26 +54,6 @@ fun <N, T> convertCykToSimpleTree(cykTree: CykTreeDerivationNode<N, T>): TreeNod
     }
 }
 
-//fun <N,T> convertCykToSimpleTree(node: CykTreeDerivationNode<N, T>): TreeNode<N, T>
-//{
-//    val children = mutableListOf<TreeNode<N, T>>()
-//
-//    node.firstChild ?.let {
-//        children.add(convertCykToSimpleTree(it))
-//    }
-//    node.secondChild ?.let {
-//        children.add(convertCykToSimpleTree(it))
-//    }
-//
-//    val item: SyntacticItem<N, T> = when
-//    {
-//        node.terminal != null -> SyntacticItem.createTerminal<N,T>(node.terminal)
-//        else -> SyntacticItem.createSymbol<N, T>(node.item!!.lhs)
-//    }
-//
-//    return TreeNode(item, children)
-//}
-
 fun <N> mergeWordsToTree(sentence: Array1<String>, tree: TreeNode<N, String>): TreeNode<N, PosAndWord>
 {
     return WordsToTreeMerger(sentence, tree).merge()
