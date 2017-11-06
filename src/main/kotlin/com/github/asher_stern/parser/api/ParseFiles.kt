@@ -16,14 +16,10 @@ fun main(args: Array<String>)
 {
     val sentenceFile = File(args[0])
     val resultFile = File(args[1])
-    val modelDirectory = File(args[2])
+    val modelDirectory: File? = if (args.size>=3) File(args[2]) else null
 
-    val gson = Gson()
-
-    val setStringType = object : TypeToken<Set<String>>(){}.type
-    val auxiliarySymbols = gson.fromJson<Set<String>>(File(modelDirectory, "auxiliary.json").readText(), setStringType)
-    val grammarType = object : TypeToken<ChomskyNormalFormGrammar<String, String>>(){}.type
-    val chomskyNormalFormGrammar = gson.fromJson<ChomskyNormalFormGrammar<String, String>>(File(modelDirectory, "grammar.json").readText(), grammarType)
+    val auxiliarySymbols = loadAuxiliarySymbols(modelDirectory)
+    val chomskyNormalFormGrammar = loadGrammar(modelDirectory)
 
     val parser = Parser(chomskyNormalFormGrammar, auxiliarySymbols)
 
@@ -40,6 +36,49 @@ fun main(args: Array<String>)
     }
 }
 
+
+private fun loadGrammar(modelDirectory: File?): ChomskyNormalFormGrammar<String, String>
+{
+    val json: String = when
+    {
+        modelDirectory != null ->
+        {
+            File(modelDirectory, "grammar.json").readText()
+        }
+        else ->
+        {
+            ObjectForClassLoader::class.java.getResourceAsStream("/com/github/asher_stern/parser/model/grammar.json").use { it.reader().use { it.readText() } }
+        }
+    }
+
+    val gson = Gson()
+    val grammarType = object : TypeToken<ChomskyNormalFormGrammar<String, String>>() {}.type
+    val chomskyNormalFormGrammar = gson.fromJson<ChomskyNormalFormGrammar<String, String>>(json, grammarType)
+    return chomskyNormalFormGrammar
+}
+
+private fun loadAuxiliarySymbols(modelDirectory: File?): Set<String>
+{
+    val json: String = when
+    {
+        modelDirectory != null ->
+        {
+            File(modelDirectory, "auxiliary.json").readText()
+        }
+        else ->
+        {
+            ObjectForClassLoader::class.java.getResourceAsStream("/com/github/asher_stern/parser/model/auxiliary.json").use { it.reader().use { it.readText() } }
+        }
+    }
+
+    val gson = Gson()
+    val setStringType = object : TypeToken<Set<String>>(){}.type
+    val auxiliarySymbols = gson.fromJson<Set<String>>(json, setStringType)
+    return auxiliarySymbols
+}
+
+
+private object ObjectForClassLoader
 
 private class SentenceLoader(private val sentenceFile: File) : Sequence<Array<PosAndWord>>, AutoCloseable
 {
