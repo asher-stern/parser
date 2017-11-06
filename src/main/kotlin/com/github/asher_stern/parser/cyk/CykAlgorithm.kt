@@ -18,13 +18,11 @@ open class CykAlgorithm<N, T>(
 {
     fun parse(): CykTreeDerivationNode<N, T>?
     {
-        if (!fillTerminalRules())
-        {
-            return null
-        }
+        fillTerminalRules()
         fillNonTerminalRules()
         if (table[1, sentence.size, grammar.startSymbol] != null)
         {
+            _parseProbability = Math.exp(table[1, sentence.size, grammar.startSymbol]!!.logProbability)
             _wellParsed = true
             return buildTree(1, sentence.size, grammar.startSymbol)
         }
@@ -35,6 +33,7 @@ open class CykAlgorithm<N, T>(
     }
 
     val wellParsed: Boolean get() = _wellParsed
+    val parseProbability: Double get() = _parseProbability
 
 
     open protected fun hackTree(): CykTreeDerivationNode<N, T>?
@@ -44,25 +43,23 @@ open class CykAlgorithm<N, T>(
     }
 
 
-    private fun fillTerminalRules(): Boolean
+    private fun fillTerminalRules()
     {
         val sentenceSize = sentence.size
         for (index in 1..sentenceSize)
         {
             val terminal = sentence[index]
             val rules = grammar.terminalRules[terminal]
-            if ( (rules == null) || (rules.isEmpty()) )
+            if ( (rules != null) && (rules.isNotEmpty()) )
             {
-                return false
-            }
-            for ( (nonTerminal, logProbability) in rules.orEmpty() )
-            {
-                table[index, index, nonTerminal] = CykTableItem<N>(nonTerminal, null, null, null, null, logProbability!!)
-            }
+                for ((nonTerminal, logProbability) in rules.orEmpty())
+                {
+                    table[index, index, nonTerminal] = CykTableItem<N>(nonTerminal, null, null, null, null, logProbability!!)
+                }
 
-            addSingleToSingleRulesToTable(index, index)
+                addSingleToSingleRulesToTable(index, index)
+            }
         }
-        return true
     }
 
     private fun find(firstStart: Int, firstEnd: Int, secondStart: Int, secondEnd: Int): Map<N, CykTableItem<N>>
@@ -200,4 +197,5 @@ open class CykAlgorithm<N, T>(
     protected val table = Table3D<Int, Int, N, CykTableItem<N>>()
 
     private var _wellParsed: Boolean = false
+    private var _parseProbability: Double = 0.0
 }
