@@ -13,6 +13,9 @@ import com.github.asher_stern.parser.utils.Array1
  * Created by Asher Stern on November-06 2017.
  */
 
+/**
+ * Programmatical API class to parse sentences. See ParseFiles.kt
+ */
 class Parser(private val chomskyNormalFormGrammar: ChomskyNormalFormGrammar<String, String>, private val auxiliarySymbols: Set<String>)
 {
     fun parse(sentence: Array<PosAndWord>): ParseResult

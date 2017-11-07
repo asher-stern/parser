@@ -6,6 +6,11 @@ import com.github.asher_stern.parser.utils.Array1
 /**
  * Created by Asher Stern on November-05 2017.
  */
+
+
+/**
+ * Extends [CykAlgorithm] to generate parse-trees also for ungrammatical sentence. So the method [parse] always returns a tree.
+ */
 class CykAlgorithmWithHack<N, T>(grammar: ChomskyNormalFormGrammar<N, T>, sentence: Array1<T>) : CykAlgorithm<N, T>(grammar, sentence)
 {
     override fun hackTree(): CykTreeDerivationNode<N, T>

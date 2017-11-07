@@ -9,7 +9,22 @@ import com.github.asher_stern.parser.utils.Table3D
  */
 
 /**
+ * Implementation of CYK algorithm to parse a given sentence. It generates the most-likely parse tree for the given sentence.
+ *
  * See http://www.cs.columbia.edu/~mcollins/courses/nlp2011/notes/pcfgs.pdf
+ *
+ * A subclass of this class, [CykAlgorithmWithHack], generates parse-trees also for non-grammatical sentence (sentences that
+ * cannot be parsed by the given grammar). (This class returns null for such sentences).
+ *
+ * The algorithm here is a modified version of CYK algorithm. The original CYK algorithm accepts syntactic-rules of
+ * Chomsky normal form: rules that are either symbol to terminal, or symbol to two symbols.
+ * This modified version also accepts rules that are single-symbol to single-symbol.
+ *
+ * The generated parse-tree is of class [CykTreeDerivationNode], which can be converted into [com.github.asher_stern.parser.tree.TreeNode]
+ * using the function [convertCykToSimpleTree] (in TreeUtils.kt).
+ *
+ * @param grammar the grammar for parsing the given sentence.
+ * @param sentence the sentence to parse (usually it is an array of part-of-speech tags).
  */
 open class CykAlgorithm<N, T>(
         protected val grammar: ChomskyNormalFormGrammar<N, T>,

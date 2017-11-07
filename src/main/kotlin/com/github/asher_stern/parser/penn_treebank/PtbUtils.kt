@@ -176,15 +176,3 @@ private fun minNonNegativeOf(x1: Int, x2: Int): Int
     }
     else return minOf(x1, x2)
 }
-
-//private fun minNonNegativeOf(x1: Int, x2: Int, x3: Int, vararg xs: Int): Int
-//{
-//    if (xs.size > 0)
-//    {
-//        return minNonNegativeOf(minNonNegativeOf(x1, x2, x3, *xs.take(xs.size-1).toIntArray()), xs.last())
-//    }
-//    else
-//    {
-//        return minNonNegativeOf(minNonNegativeOf(x1, x2), x3)
-//    }
-//}

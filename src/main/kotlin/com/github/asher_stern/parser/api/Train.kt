@@ -18,6 +18,13 @@ import java.io.FileFilter
  * Created by Asher Stern on November-06 2017.
  */
 
+/**
+ * Train the parser with Penn-Treebank.
+ * @param args
+ * 1. Penn Treebank directory: the directory which contains ".mrg" files.
+ * 2. destination directory: where the model files will be generated.
+ *
+ */
 fun main(args: Array<String>)
 {
     val pennTreebankDirectory = args[0]

@@ -84,24 +84,6 @@ class GrammarAcquisitionFromTrees<N, T>(private val trees: List<TreeNode<N, T>>)
     }
 
 
-//    private fun debug_printNakedRules()
-//    {
-//        for (rule in nakedRules.entries.sortedBy { it.value })
-//        {
-//            println(rule.key.friendlyString + ": " + rule.value)
-//        }
-//
-//        val mapCountToHowMany = mutableMapOf<Long, Long>()
-//        for ( (_, count) in nakedRules )
-//        {
-//            mapCountToHowMany._inc(count)
-//        }
-//        for ( (count, howMany) in mapCountToHowMany.entries.sortedBy { it.key })
-//        {
-//            println("$count: $howMany")
-//        }
-//    }
-
     private val nakedRules = mutableMapOf<NakedRule<N, T>, Long>()
 }
 
