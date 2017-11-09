@@ -1,6 +1,5 @@
 package com.github.asher_stern.parser.tree
 
-import com.github.asher_stern.parser.cyk.CykTreeDerivationNode
 import com.github.asher_stern.parser.grammar.NakedRule
 import com.github.asher_stern.parser.grammar.SyntacticItem
 import com.github.asher_stern.parser.utils.Array1
@@ -16,43 +15,6 @@ fun <N, T> extractNakedRuleFromNode(content: N, children: List<TreeNode<N, T>>):
 fun <N, T> extractNakedRuleFromNode(node: TreeNode<N, T>): NakedRule<N, T> =
         extractNakedRuleFromNode(node.content.symbol!!, node.children)
 
-
-fun <N, T> convertCykToSimpleTree(cykTree: CykTreeDerivationNode<N, T>): TreeNode<N, T>
-{
-    if (cykTree.terminal != null)
-    {
-        return TreeNode(SyntacticItem.createTerminal(cykTree.terminal))
-    }
-    else
-    {
-        cykTree.item!! // Merely check not null
-
-        val rootNode = TreeNode<N, T>(SyntacticItem.createSymbol(cykTree.item.lhs))
-        var node: TreeNode<N, T> = rootNode
-        for (singleSymbol in cykTree.item.rhsSingleSymbol.orEmpty())
-        {
-            val child = TreeNode(SyntacticItem.createSymbol<N,T>(singleSymbol))
-            node.addChild(child)
-            node = child
-        }
-
-        if (cykTree.singleChild != null)
-        {
-            node.addChild(convertCykToSimpleTree(cykTree.singleChild!!))
-            return rootNode
-        }
-        else if ( (cykTree.firstChild != null) && (cykTree.secondChild != null) )
-        {
-            node.addChild(convertCykToSimpleTree(cykTree.firstChild!!))
-            node.addChild(convertCykToSimpleTree(cykTree.secondChild!!))
-            return rootNode
-        }
-        else
-        {
-            throw RuntimeException("Non terminal node has no children.")
-        }
-    }
-}
 
 fun <N> mergeWordsToTree(sentence: Array1<String>, tree: TreeNode<N, String>): TreeNode<N, PosAndWord>
 {

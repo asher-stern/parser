@@ -22,8 +22,6 @@ import com.github.asher_stern.parser.utils.Table3D
  * Chomsky normal form: rules that are either symbol to terminal, or symbol to two symbols.
  * This modified version also accepts rules that are single-symbol to single-symbol.
  *
- * The generated parse-tree is of class [CykTreeDerivationNode], which can be converted into [com.github.asher_stern.parser.tree.TreeNode]
- * using the function [convertCykToSimpleTree] (in TreeUtils.kt).
  *
  * @param grammar the grammar for parsing the given sentence.
  * @param sentence the sentence to parse (usually it is an array of part-of-speech tags).
