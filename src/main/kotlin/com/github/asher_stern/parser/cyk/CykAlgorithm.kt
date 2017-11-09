@@ -1,6 +1,8 @@
 package com.github.asher_stern.parser.cyk
 
 import com.github.asher_stern.parser.grammar.ChomskyNormalFormGrammar
+import com.github.asher_stern.parser.grammar.SyntacticItem
+import com.github.asher_stern.parser.tree.TreeNode
 import com.github.asher_stern.parser.utils.Array1
 import com.github.asher_stern.parser.utils.Table3D
 
@@ -31,7 +33,7 @@ open class CykAlgorithm<N, T>(
         protected val sentence: Array1<T>
 )
 {
-    fun parse(): CykTreeDerivationNode<N, T>?
+    fun parse(): TreeNode<N,T>?
     {
         fillTerminalRules()
         fillNonTerminalRules()
@@ -51,7 +53,7 @@ open class CykAlgorithm<N, T>(
     val parseProbability: Double get() = _parseProbability
 
 
-    open protected fun hackTree(): CykTreeDerivationNode<N, T>?
+    open protected fun hackTree(): TreeNode<N,T>?
     {
         // Can be implemented by sub-class
         return null
@@ -176,19 +178,19 @@ open class CykAlgorithm<N, T>(
         }
     }
 
-    protected fun buildTree(start: Int, end: Int, symbol: N): CykTreeDerivationNode<N, T>
+    protected fun buildTree(start: Int, end: Int, symbol: N): TreeNode<N, T>
     {
         val item = table[start, end, symbol] ?: throw RuntimeException("Tree cannot be built. Null for $start, $end, $symbol.")
+        val (root, lowestNode) = convertItemToTreeNode(item)
         if (item.rhsFirst == null)
         {
             if (start == end)
             {
                 val terminal = sentence[start]
-                val terminalNode = CykTreeDerivationNode<N, T>(terminal)
+                val terminalNode = TreeNode<N, T>(SyntacticItem.createTerminal(terminal))
 
-                val node = CykTreeDerivationNode<N, T>(item)
-                node.singleChild = terminalNode
-                return node
+                lowestNode.addChild(terminalNode)
+                return root
             }
             else
             {
@@ -200,11 +202,27 @@ open class CykAlgorithm<N, T>(
             val rhsFirstChild = buildTree(start, item.secondBeginIndex!!-1, item.rhsFirst)
             val rhsSecondChild = buildTree(item.secondBeginIndex, end, item.rhsSecond!!)
 
-            val node = CykTreeDerivationNode<N, T>(item)
-            node.firstChild = rhsFirstChild
-            node.secondChild = rhsSecondChild
-            return node
+            lowestNode.addChild(rhsFirstChild)
+            lowestNode.addChild(rhsSecondChild)
+
+            return root
         }
+    }
+
+    private fun convertItemToTreeNode(item: CykTableItem<N>): Pair<TreeNode<N, T>, TreeNode<N, T>>
+    {
+        val root = TreeNode<N, T>(SyntacticItem.createSymbol(item.lhs))
+        var node = root
+        if (item.rhsSingleSymbol != null)
+        {
+            for (collapsedSymbol in item.rhsSingleSymbol)
+            {
+                val child = TreeNode<N, T>(SyntacticItem.createSymbol(collapsedSymbol))
+                node.addChild(child)
+                node = child
+            }
+        }
+        return Pair(root, node)
     }
 
 

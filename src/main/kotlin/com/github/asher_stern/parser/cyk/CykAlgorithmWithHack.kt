@@ -1,6 +1,8 @@
 package com.github.asher_stern.parser.cyk
 
 import com.github.asher_stern.parser.grammar.ChomskyNormalFormGrammar
+import com.github.asher_stern.parser.grammar.SyntacticItem
+import com.github.asher_stern.parser.tree.TreeNode
 import com.github.asher_stern.parser.utils.Array1
 
 /**
@@ -13,66 +15,48 @@ import com.github.asher_stern.parser.utils.Array1
  */
 class CykAlgorithmWithHack<N, T>(grammar: ChomskyNormalFormGrammar<N, T>, sentence: Array1<T>) : CykAlgorithm<N, T>(grammar, sentence)
 {
-    override fun hackTree(): CykTreeDerivationNode<N, T>
+    override fun hackTree(): TreeNode<N, T>
     {
         val tree = generateTreeForRange(1, sentence.size)
-        if (tree.item!!.lhs == grammar.startSymbol)
+        if (tree.content.symbol == grammar.startSymbol)
         {
             return tree
         }
         else
         {
-            val newTree = CykTreeDerivationNode<N, T>(CykTableItem<N>(grammar.startSymbol, null, null, null, null, 0.0))
-            newTree.singleChild = tree
+            val newTree = TreeNode<N, T>(SyntacticItem.createSymbol(grammar.startSymbol))
+            newTree.addChild(tree)
             return newTree
         }
     }
 
 
-    private fun generateTreeForRange(start: Int, end: Int): CykTreeDerivationNode<N, T>
+    private fun generateTreeForRange(start: Int, end: Int): TreeNode<N, T>
     {
         val longest = findLongest(start, end)
         if (longest == null)
         {
-            var lastRoot: CykTreeDerivationNode<N, T>? = null
-            for (_end in end downTo start)
-            {
-                val terminalNode = CykTreeDerivationNode<N, T>(sentence[_end])
-                val terminalParent = CykTreeDerivationNode<N, T>(CykTableItem<N>(grammar.startSymbol, null, null, null, null, 0.0))
-                terminalParent.singleChild = terminalNode
-
-                if (lastRoot != null)
-                {
-                    val newRoot = CykTreeDerivationNode<N, T>(CykTableItem<N>(grammar.startSymbol, null, null, null, null, 0.0))
-                    newRoot.firstChild = terminalParent
-                    newRoot.secondChild = lastRoot
-                    lastRoot = newRoot
-                }
-                else
-                {
-                    lastRoot = terminalParent
-                }
-            }
-            return lastRoot!!
+            val children = sentence.slice(start, end).map { TreeNode<N, T>(SyntacticItem.createTerminal(it)) }
+            return TreeNode<N, T>(SyntacticItem.createSymbol(grammar.startSymbol), children.toMutableList())
         }
         else
         {
             val longestTree = buildTree(longest.start, longest.end, longest.symbol)
-            var ret: CykTreeDerivationNode<N, T> = longestTree
+            var ret: TreeNode<N, T> = longestTree
             if (longest.start > start)
             {
                 val toLeft = generateTreeForRange(start, longest.start-1)
-                val newRet = CykTreeDerivationNode<N, T>(CykTableItem<N>(grammar.startSymbol, null, null, null, null, 0.0))
-                newRet.firstChild = toLeft
-                newRet.secondChild = ret
+                val newRet = TreeNode<N, T>(SyntacticItem.createSymbol(grammar.startSymbol))
+                newRet.addChild(toLeft)
+                newRet.addChild(ret)
                 ret = newRet
             }
             if (longest.end < end)
             {
                 val toRight = generateTreeForRange(longest.end+1, end)
-                val newRet = CykTreeDerivationNode<N, T>(CykTableItem<N>(grammar.startSymbol, null, null, null, null, 0.0))
-                newRet.firstChild = ret
-                newRet.secondChild = toRight
+                val newRet = TreeNode<N, T>(SyntacticItem.createSymbol(grammar.startSymbol))
+                newRet.addChild(ret)
+                newRet.addChild(toRight)
                 ret = newRet
             }
             return ret

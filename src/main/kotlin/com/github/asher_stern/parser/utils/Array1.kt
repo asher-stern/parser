@@ -5,7 +5,7 @@ import java.util.*
 /**
  * Created by Asher Stern on November-02 2017.
  */
-class Array1<T>(private val underlying: Array<T>)
+class Array1<T>(private val underlying: Array<T>) : Iterable<T>
 {
     companion object
     {
@@ -42,10 +42,13 @@ class Array1<T>(private val underlying: Array<T>)
         underlying[index-1] = value
     }
 
-    operator fun iterator(): Iterator<T>
+    override operator fun iterator(): Iterator<T>
     {
         return underlying.iterator()
     }
+
+    fun slice(start:Int, endInclusive:Int): Array1<T> =
+            Array1(underlying.sliceArray( (start-1)..(endInclusive-1) ))
 
     override fun toString(): String = underlying.joinToString(", ", "[", "]")
 

@@ -3,10 +3,7 @@ package com.github.asher_stern.parser.api
 import com.github.asher_stern.parser.cyk.CykAlgorithmWithHack
 import com.github.asher_stern.parser.grammar.ChomskyNormalFormGrammar
 import com.github.asher_stern.parser.grammar.TreeBackwardConverter
-import com.github.asher_stern.parser.tree.PosAndWord
-import com.github.asher_stern.parser.tree.TreeNode
-import com.github.asher_stern.parser.tree.convertCykToSimpleTree
-import com.github.asher_stern.parser.tree.mergeWordsToTree
+import com.github.asher_stern.parser.tree.*
 import com.github.asher_stern.parser.utils.Array1
 
 /**
@@ -22,7 +19,7 @@ class Parser(private val chomskyNormalFormGrammar: ChomskyNormalFormGrammar<Stri
     {
         val sentence_asArray1 = Array1(sentence.map { it.pos }.toTypedArray())
         val cykAlgorithm = CykAlgorithmWithHack(chomskyNormalFormGrammar, sentence_asArray1)
-        val treePosOnly = convertCykToSimpleTree(cykAlgorithm.parse()!!)
+        val treePosOnly = cykAlgorithm.parse()!!
 
         val treeBackwardConverted = TreeBackwardConverter<String, String>(auxiliarySymbols).convertTree(treePosOnly)
 
