@@ -31,6 +31,12 @@ open class CykAlgorithm<N, T>(
         protected val sentence: Array1<T>
 )
 {
+    /**
+     * Parse the sentence given in the constructor.
+     * @return the parse-tree representing the syntactic analysis of the given sentence. Null is returned if no such
+     * a tree can be constructed, according to the grammar provided in the constructor.
+     * Note that [CykAlgorithmWithHack] subclass **always** returns a tree, and never returns null.
+     */
     fun parse(): TreeNode<N,T>?
     {
         fillTerminalRules()
@@ -163,7 +169,7 @@ open class CykAlgorithm<N, T>(
                     val bestSoFar = (existingCandidate == null) || (newItemLogProbability > existingCandidate.logProbability)
                     if (bestSoFar)
                     {
-                        val rhsList = correspondingRhsInTable.rhsSingleSymbol.orEmpty() + s2sRule.rhs
+                        val rhsList = listOf(s2sRule.rhs) + correspondingRhsInTable.rhsSingleSymbol.orEmpty()
                         candidatesRhs1[s2sRule.lhs] = CykTableItem(s2sRule.lhs, rhsList, correspondingRhsInTable.rhsFirst, correspondingRhsInTable.rhsSecond, correspondingRhsInTable.secondBeginIndex, newItemLogProbability)
                     }
                 }

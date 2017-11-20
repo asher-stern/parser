@@ -6,6 +6,11 @@ import com.github.asher_stern.parser.utils.Table3D
 /**
  * Created by Asher Stern on November-02 2017.
  */
+
+/**
+ * A data-structure for grammar in Chomsky-normal-form (with the addition of also single-symbol to single-symbol rules).
+ * It holds the same information as [Grammar], but is more convenient to work with in CYK algorithm (see [com.github.asher_stern.parser.cyk.CykAlgorithm]).
+ */
 data class ChomskyNormalFormGrammar<N, T>(
         val startSymbol: N,
         val terminals: Set<T>,
