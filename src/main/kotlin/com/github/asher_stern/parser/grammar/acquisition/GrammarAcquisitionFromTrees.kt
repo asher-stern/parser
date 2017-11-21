@@ -3,6 +3,7 @@ package com.github.asher_stern.parser.grammar.acquisition
 
 import com.github.asher_stern.parser.grammar.NakedRule
 import com.github.asher_stern.parser.grammar.Rule
+import com.github.asher_stern.parser.grammar.SyntacticItem
 import com.github.asher_stern.parser.tree.TreeNode
 
 
@@ -11,8 +12,15 @@ import com.github.asher_stern.parser.tree.TreeNode
  */
 class GrammarAcquisitionFromTrees<N, T>(private val trees: List<TreeNode<N, T>>)
 {
+    /**
+     * This property can be set **before** calling [acquire], in order to remove all the rules that do not appear more
+     * then the specified limitation.
+     */
     var absoluteEncounteredLimitation: Int = 0
 
+    /**
+     * Acquire, i.e., extract, all the rules from the corpus (given as the [trees] constructor parameter).
+     */
     fun acquire(): Set<Rule<N, T>>
     {
         extractNakedRules()
@@ -44,10 +52,10 @@ class GrammarAcquisitionFromTrees<N, T>(private val trees: List<TreeNode<N, T>>)
     {
         val ret = mutableSetOf<Rule<N, T>>()
 
-        val nameCounter = mutableMapOf<N, Long>()
-        for (nakedRule in nakedRules.keys.sortedByDescending { nakedRules.getValue(it) })
+        val nameCounter = mutableMapOf<N, Long>() // This is just a map from each symbol to 1,2,3,... It is used for naming rules, for example S_1, VP_3, etc. The name is not used for computations, but for presentation and debugging only.
+        for (nakedRule in nakedRules.keys.sortedByDescending { nakedRules.getValue(it) }) // Sorting is not really necessary here. The effect is just adding the more common rules first. But anyhow, all the (relevant) rules will be added.
         {
-            val encountered = nakedRules.getValue(nakedRule)
+            val encountered: Long = nakedRules.getValue(nakedRule)
             if (encountered >= absoluteEncounteredLimitation)
             {
                 nameCounter._inc(nakedRule.lhs)
@@ -62,7 +70,7 @@ class GrammarAcquisitionFromTrees<N, T>(private val trees: List<TreeNode<N, T>>)
 
     private fun extractRulesFromTree(tree: TreeNode<N, T>)
     {
-        if (tree.content.symbol != null)
+        if (tree.content.symbol != null) // = if the given (sub-)tree is not a terminal node
         {
             nakedRules._inc(extractRuleFromNode(tree))
             for (child in tree.children)
@@ -78,7 +86,7 @@ class GrammarAcquisitionFromTrees<N, T>(private val trees: List<TreeNode<N, T>>)
         else
         {
             val lhs: N = node.content.symbol
-            val rhs = node.children.map { it.content }
+            val rhs: List<SyntacticItem<N, T>> = node.children.map { it.content }
             return NakedRule(lhs, rhs)
         }
     }

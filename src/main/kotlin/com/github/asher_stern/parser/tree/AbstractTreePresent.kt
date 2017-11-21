@@ -3,6 +3,10 @@ package com.github.asher_stern.parser.tree
 /**
  * Created by Asher Stern on November-05 2017.
  */
+
+/**
+ * Class for presenting a tree: generating a easily-readable string representation of the tree.
+ */
 abstract class AbstractTreePresent<T>(private val tree: TreeNode<String, T>)
 {
     fun present(): String

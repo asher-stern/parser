@@ -8,7 +8,10 @@ import com.github.asher_stern.parser.tree.TreeNode
  * Created by Asher Stern on November-03 2017.
  */
 
-
+/**
+ * Extract all the tress from an entire ".mrg" file.
+ * @param str the contents of an ".mrg" file.
+ */
 fun extractTrees(str: String): List<TreeNode<String, PosAndWord>> =
         str.trim().let { _str -> extractTrees(_str.toCharArray(), 0, _str.length).map { removeRedundantRoot(it) }.map { addSRoot(it) }.map { removeNone(it)!! } }
 
@@ -21,6 +24,7 @@ fun normalizePtbPosTag(tag: String): String
     if (_tag.any { it.isLetter() }) throw RuntimeException("Bad tag: $tag")
     return "PUNCT"
 }
+
 
 private fun extractTrees(str: CharArray, start: Int, end: Int): List<TreeNode<String, PosAndWord>>
 {
